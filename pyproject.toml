@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "modbus-rtu-data-collector"
+version = "0.1.0"
+description = ""
+authors = ["Asncodes-80 <asn80.asn@hotmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pymodbus = {extras = ["all"], version = "^3.5.2"}
+pyserial = "^3.5"
+bitstring = "^4.2.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

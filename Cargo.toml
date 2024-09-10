@@ -1,0 +1,10 @@
+[package]
+name = "modbus-rtu-data-collector"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = {version = "1.35.1", default-features = false, features = ["macros", "rt-multi-thread", "time"]} 
+tokio-modbus = {version = "*", default-features = false, features = ["rtu"]}
+serialport = "4.0"
+tokio-serial = "5.4.4" 
