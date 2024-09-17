@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from pymodbus.client import ModbusSerialClient
@@ -10,11 +11,7 @@ def get_serial_comport():
     COMPORT_NAME: str = "STM32 Virtual ComPort"
 
     ports = serial.tools.list_ports.comports()
-    com_set = set(
-        [port.device if port.product == COMPORT_NAME else None for port in ports]
-    )
-
-    return list(com_set)[1:]
+    return [port.device for port in ports if port.product == COMPORT_NAME]
 
 
 def single_byte(v):
@@ -23,18 +20,24 @@ def single_byte(v):
     return [f"{first_byte:#04x}", f"{second_byte:#04x}"]
 
 
-def parse_data(data: list):
-    input = [single_byte(v) for v in data[0:6]]
-    analog = [hex(v) for v in data[6:10]]
-    output = [BitArray(hex=hex(v)).bin[4:] for v in data[10:]]
+def parse_data(data: list, slave_id: str, port_name: str):
+    input = [
+        [int(single_byte(v)[0], 16), int(single_byte(v)[1], 16)] for v in data[0:6]
+    ]
+    analog = [int(hex(v), 16) for v in data[6:10]]
+    output = [BitArray(hex=hex(v)).bin for v in data[10:]]
 
     return {
-        "timestamp": datetime.now().timestamp(),
-        "digital": input[0:2],
-        "temp": input[3:5],
-        "humidity": input[4:6],
+        "slave": {"id": str(slave_id), "port": port_name},
+        "timestamp": int(datetime.now().replace(second=0, microsecond=0).timestamp()),
+        "digital": [item for sublist in input[0:2] for item in sublist],
+        "temperature": [item for sublist in input[3:5] for item in sublist],
+        "humidity": [item for sublist in input[4:6] for item in sublist],
         "analog": analog,
-        "output": {"led": output[0], "relay": output[1]},
+        "output": {
+            "led": {i: output[0][i] for i in range(len(output[0]))},
+            "relay": {i: output[1][i] for i in range(len(output[1]))},
+        },
     }
 
 
@@ -44,7 +47,7 @@ def modbus_connect(port: str):
     client = ModbusSerialClient(
         port=port,
         baudrate=9600,
-        timeout=3,
+        timeout=10,
         parity="N",
         stopbits=1,
         bytesize=8,
@@ -57,28 +60,50 @@ def modbus_connect(port: str):
             )
 
             if not response.isError():
-                return parse_data(response.registers)
+                return parse_data(response.registers, slave, port)
             else:
                 return {"response": response}
-
         else:
+            # Modbus connection error
+            client.close()
             return {}
+
+    client.close()
 
 
 def main():
-    ports: list[int] = get_serial_comport()
+    ports: list[str] = get_serial_comport()
+
     if len(ports) == 0:
-        print("Serial comport list is empty.")
+        print(json.dumps({"comport_issue": "Serial comport list is empty."}))
     else:
         for port in ports:
             data = modbus_connect(port)
 
             if data == {}:
-                print("Could't connect to the Modbus Slave")
+                print(
+                    json.dumps(
+                        {
+                            "modbus_connection_error": "Could't connect to the Modbus Slave"
+                        }
+                    )
+                )
             elif data.get("response", "") != "":
-                print(data["response"])
+                print(json.dumps({"fault": data["response"]}))
             else:
-                print(data)
+                with open("data.json", "r+") as file:
+                    try:
+                        previous_data = json.load(file)
+                    except json.JSONDecodeError:
+                        previous_data = []
+
+                    previous_data.append(
+                        data,
+                    )
+                    # Moves cursor to the beginning of the file to overwrite
+                    file.seek(0)
+                    json.dump(previous_data, file, indent=3, sort_keys=True)
+                    file.truncate()
 
 
 main()

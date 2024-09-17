@@ -1,9 +1,20 @@
-# modbus-rtu-data-collector
+# Modbus RTU Data Collector
 
-A Rust program that gets data over Modbus virtual COM port and saves them in a file
+## Get packages in poetry environment
 
-## TODO
+```sh
+poetry update
+```
 
-+ [ ] Get list of serial tty about ACMs
-+ [x] Separate 0..6 values and convert them to single bit
-+ [ ] Convert to Async function
+## Run
+
+```sh
+poetry run python main.py
+```
+
+## Errors
+
+* "comport_issue": There is not any Comport connection to computer
+* "modbus_connection_error": "Client can't connect and send request to the
+  Modbus Slave at this time"
+* "fault": Software fault in modbus response, check python code
