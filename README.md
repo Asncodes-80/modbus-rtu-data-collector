@@ -8,6 +8,13 @@ poetry update
 
 ## Run
 
+During client configurations, you should set `$USER` Read-Write permission to
+`/var/log` directory.
+
+```sh
+sudo chmod o+w /var/log
+```
+
 ```sh
 poetry run python main.py
 ```

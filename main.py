@@ -1,4 +1,4 @@
-import json
+import json, os
 from datetime import datetime
 
 from pymodbus.client import ModbusSerialClient
@@ -71,6 +71,37 @@ def modbus_connect(port: str):
     client.close()
 
 
+def save_file(data):
+    log_directory = "/var/log/psim"
+
+    # Create the directory if it doesn't exist
+    try:
+        os.makedirs(log_directory, exist_ok=True)
+    except OSError as e:
+        print(f"Error creating directory: {e}")
+
+    json_file_path = os.path.join(log_directory, "modbus_data.json")
+
+    # Open the JSON file for reading and writing
+    try:
+        with open(json_file_path, "r+") as file:
+            try:
+                previous_data = json.load(file)
+            except json.JSONDecodeError:
+                previous_data = []
+
+            previous_data.append(data)
+
+            # Moves cursor to the beginning of the file to overwrite
+            file.seek(0)
+            json.dump(previous_data, file, indent=3, sort_keys=True)
+            file.truncate()
+    except FileNotFoundError:
+        # If the file does not exist, create it and write the data
+        with open(json_file_path, "w") as file:
+            json.dump([data], file, indent=3, sort_keys=True)
+
+
 def main():
     ports: list[str] = get_serial_comport()
 
@@ -91,19 +122,8 @@ def main():
             elif data.get("response", "") != "":
                 print(json.dumps({"fault": data["response"]}))
             else:
-                with open("data.json", "r+") as file:
-                    try:
-                        previous_data = json.load(file)
-                    except json.JSONDecodeError:
-                        previous_data = []
-
-                    previous_data.append(
-                        data,
-                    )
-                    # Moves cursor to the beginning of the file to overwrite
-                    file.seek(0)
-                    json.dump(previous_data, file, indent=3, sort_keys=True)
-                    file.truncate()
+                save_file(data)
 
 
-main()
+if __name__ == "__main__":
+    main()
