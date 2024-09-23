@@ -1,0 +1,42 @@
+\documentclass[a4paper]{article}
+\usepackage{forest}
+\usepackage{float}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{ragged2e}
+\usepackage{color}
+\usepackage{xepersian}
+\usepackage{subfiles}
+\settextfont[Scale=1]{XB Roya}
+
+\title{مستندات مربوط به سرویس پایتون برنامه \lr{PSIM}}
+\author{صنایع ارتباطی پایا | واحد تحقیقات}
+
+\begin{document}
+\maketitle
+
+پس از یک روز بررسی عملکرد سرویس نوشته شده پایتون، فرمول محاسبه مقدار فضایی که
+توسط فایل \lr{json} حاصل از سرویس، اشغال می‌شود مبتنی بر تعداد دستگاه‌های
+\lr{PSIM} است و در طی یک سال می‌باشد:
+
+\begin{equation}
+    k = \frac{6}{T} GB/year
+\end{equation}
+
+هر دستگاه \lr{PSIM} مبتنی بر فرمول $k$، در یک سال فضایی مشخص را با واحد گیگابایت
+اشغال می‌کند، که در آن $T$ زمان در واحد ثانیه می‌باشد.
+
+برای بدست آوردن مدت زمان ذخیره‌سازی از فرمول زیر استفاده می‌کنیم:
+
+\begin{equation}
+    storage time = \frac{Total Storage}{k \times N}    
+\end{equation}
+
+که در آن $k$ از فرمول قبلی گرفته می‌شود و پارامتر $N$ تعداد دستگاه‌های \lr{PSIM}
+را نشان می‌دهد.
+
+تنظیمات اجرای سرویس توسط برنامه \lr{pm2} هر ۳ ثانیه یکبار می‌باشد.
+
+\end{document}
