@@ -71,7 +71,7 @@ def modbus_connect(port: str):
     client.close()
 
 
-def save_file(data):
+def save_file(data, file_name):
     log_directory = "/var/log/psim"
 
     # Create the directory if it doesn't exist
@@ -80,7 +80,7 @@ def save_file(data):
     except OSError as e:
         print(f"Error creating directory: {e}")
 
-    json_file_path = os.path.join(log_directory, "modbus_data.json")
+    json_file_path = os.path.join(log_directory, file_name)
 
     # Open the JSON file for reading and writing
     try:
@@ -106,23 +106,23 @@ def main():
     ports: list[str] = get_serial_comport()
 
     if len(ports) == 0:
-        print(json.dumps({"comport_issue": "Serial comport list is empty."}))
+        save_file(
+            {"comport_issue": "Serial comport list is empty."},
+            "errors.json",
+        )
     else:
         for port in ports:
             data = modbus_connect(port)
 
             if data == {}:
-                print(
-                    json.dumps(
-                        {
-                            "modbus_connection_error": "Could't connect to the Modbus Slave"
-                        }
-                    )
+                save_file(
+                    {"modbus_connection_error": "Could't connect to the Modbus Slave"},
+                    "errors.json",
                 )
             elif data.get("response", "") != "":
-                print(json.dumps({"fault": data["response"]}))
+                save_file({"fault": data["response"]}, "errors.json")
             else:
-                save_file(data)
+                save_file(data, "modbus_data.json")
 
 
 if __name__ == "__main__":
