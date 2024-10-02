@@ -27,3 +27,4 @@ data.json
 *.out
 *.log
 *.aux
+*.toc

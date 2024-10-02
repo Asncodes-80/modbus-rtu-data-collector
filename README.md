@@ -11,6 +11,8 @@ poetry update
 During client configurations, you should set `$USER` Read-Write permission to
 `/var/log` directory.
 
+NOTE: find logs at `/var/log/psim`.
+
 ```sh
 sudo chmod o+w /var/log
 ```
@@ -21,7 +23,13 @@ sudo chmod o+w /var/log
 poetry run python main.py
 ```
 
-### Cronjob
+### Auto Startup with Parallel Machine to Machine
+
+```sh
+pm2 startup
+```
+
+#### Run as Background Service
 
 Run the following command to make the `psim.sh` script executable.
 
@@ -30,19 +38,19 @@ chmod +x psim.sh
 ```
 
 ```sh
-crontab -e
+pm2 start ./psim.sh
 ```
 
-In cronjob:
-
-```ini
-@reboot /home/$USER/Development/modbus-rtu-data-collector/psim.sh
-```
-
-Run the `psim.sh` in the Background:
+#### Check Service is Run
 
 ```sh
-nohup /home/$USER/Development/modbus-rtu-data-collector/psim.sh &
+pm2 list
+```
+
+#### Save service
+
+```sh
+pm2 save
 ```
 
 ## Errors
