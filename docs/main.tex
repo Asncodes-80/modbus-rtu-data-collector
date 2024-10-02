@@ -17,6 +17,65 @@
 \begin{document}
 \maketitle
 
+\tableofcontents
+
+\section{آدرس‌ها و ارتباطات}
+
+برای ورود به سیستم از اطلاعات زیر استفاده کنید:
+
+\begin{LTR}
+    \begin{table}[h]
+        \centering
+        \caption{آدرس شبکه‌}
+            \begin{tabular}{c|cc}
+                \textbf{Service} & \textbf{IP Add} & \textbf{Port \#} \\ \hline
+                \lr{X-RDP} & \lr{5.201.128.78} & \lr{3389} \\ 
+                \lr{SSH} & \lr{5.201.128.78} & \lr{8624} \\ 
+            \end{tabular}
+    \end{table}
+\end{LTR}
+
+\begin{LTR}
+    \begin{table}[h]
+        \centering
+        \caption{کاربران تعریف شده}
+            \begin{tabular}{c|cc}
+                \textbf{Service} & \textbf{Username} & \textbf{Password} \\ \hline
+                \lr{X-RDP} & \lr{paya} & \lr{paya@2024} \\
+                \lr{SSH} & \lr{paya} & \lr{paya@2024} \\
+            \end{tabular}
+    \end{table}
+\end{LTR}
+
+
+\section{پیکربندی نرم‌افزار \lr{Zabbix} با استفاده از \lr{Docker}}
+
+برنامه \lr{Zabbix} با اطلاعات زیر در دسترس است:
+
+\begin{LTR}
+    \begin{table}[h]
+        \centering
+            \begin{tabular}{ccc}
+                \textbf{HTTP Address} & \textbf{Username} & \textbf{Password} \\ \hline
+                \lr{localhost:8080} & \lr{Admin} & \lr{zabbix} \\
+            \end{tabular}
+    \end{table}
+\end{LTR}
+
+\section{مسیر فایل‌ها و منابع}
+
+\begin{itemize}
+    \item برای دسترسی به برنامه \lr{Python} به آدرس
+    \lr{~/Development/modbus-rtu-data-collector} مراجعه کنید.
+    \begin{itemize}
+        \item برای داکیومنت برنامه به فایل \lr{README.md} مراجعه کنید.
+    \end{itemize}
+    \item برای دسترسی به پیکربندی \lr{docker-compose} برنامه \lr{Zabbix} به آدرس
+    \lr{~/Development/zabbix-monit} مراجعه کنید.
+\end{itemize}
+
+\section{تخمین میزان حجم مورد استفاده فایل لاگ}
+
 پس از یک روز بررسی عملکرد سرویس نوشته شده پایتون، فرمول محاسبه مقدار فضایی که
 توسط فایل \lr{json} حاصل از سرویس، اشغال می‌شود مبتنی بر تعداد دستگاه‌های
 \lr{PSIM} است و در طی یک سال می‌باشد:
