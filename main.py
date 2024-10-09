@@ -44,6 +44,40 @@ def parse_data(data: list, slave_id: str, port_name: str):
 
     Returns:
         dict: final information of every PSIM device gathered through Modbus.
+
+    Sample:
+    ```json
+    {
+        "timestamp": 1726560300,
+        "slave": {
+            "id": "1",
+            "port": "/dev/ttyACM0"
+        },
+        "host": {
+            "architecture": ["64bit", "ELF"],
+            "machine": "x86_64",
+            "name": "hostname",
+            "nicInterfaces": {
+                "eno1": {
+                "HWaddr": "ac:22:0b:c8:c1:10",
+                "inet4": "172.16.24.134/24",
+                "inet6": "fe80::adda:8a65:1e4:c6ed/64",
+                "state": "UP"
+                }
+            },
+            "platform": "Linux-6.8.12-3-MANJARO-x86_64-with-glibc2.39",
+            "pythonVersion": "3.12.4"
+        },
+        "digital": [1, 0, 1, 0],
+        "temperature": [12, 13, 14, 15],
+        "humidity": [14, 15, 16, 17],
+        "analog": [1234, 3456, 4567, 5854],
+        "output": {
+        "led": [0, 1, 0, 1],
+        "relay": [1, 0, 1, 0]
+        }
+    }
+    ```
     """
     input = [
         [int(single_byte(v)[0], 16), int(single_byte(v)[1], 16)] for v in data[0:6]
