@@ -1,11 +1,25 @@
-import json, os
+import json, os, platform, socket
 from datetime import datetime
 
 from pymodbus.client import ModbusSerialClient
 from bitstring import BitArray
+from get_nic import getnic
+
+
+def dev_info() -> dict:
+    return {
+        "name": socket.gethostname(),
+        "nicInterfaces": getnic.ipaddr(getnic.interfaces()),
+        "platform": platform.platform(),
+        "architecture": platform.architecture(),
+        "machine": platform.machine(),
+        "pythonVersion": platform.python_version(),
+    }
 
 
 def get_serial_comport():
+    """Only returns comport type tty USB ports."""
+
     import serial.tools.list_ports
 
     COMPORT_NAME: str = "STM32 Virtual ComPort"
@@ -21,6 +35,16 @@ def single_byte(v):
 
 
 def parse_data(data: list, slave_id: str, port_name: str):
+    """Parses Modbus data into human readable form.
+
+    Args:
+        data (list): raw Modbus data from HEXADECIMAL system
+        slave_id (str): It's float between hardware I/O ports modules
+        port_name (str): USB port name like `/dev/tty/ACM0` as the comport type
+
+    Returns:
+        dict: final information of every PSIM device gathered through Modbus.
+    """
     input = [
         [int(single_byte(v)[0], 16), int(single_byte(v)[1], 16)] for v in data[0:6]
     ]
@@ -28,20 +52,26 @@ def parse_data(data: list, slave_id: str, port_name: str):
     output = [BitArray(hex=hex(v)).bin for v in data[10:]]
 
     return {
-        "slave": {"id": str(slave_id), "port": port_name},
         "timestamp": int(datetime.now().replace(second=0, microsecond=0).timestamp()),
+        "slave": {"id": str(slave_id), "port": port_name},
+        "host": dev_info(),
         "digital": [item for sublist in input[0:2] for item in sublist],
         "temperature": [item for sublist in input[3:5] for item in sublist],
         "humidity": [item for sublist in input[4:6] for item in sublist],
         "analog": analog,
         "output": {
-            "led": {i: output[0][i] for i in range(len(output[0]))},
-            "relay": {i: output[1][i] for i in range(len(output[1]))},
+            "led": [output[0][i] for i in range(len(output[0]))],
+            "relay": [output[1][i] for i in range(len(output[1]))],
         },
     }
 
 
 def modbus_connect(port: str):
+    """Modbus connection
+
+    Args:
+        port (str): Comport USB tty
+    """
     slave_id: list[int] = [1, 2, 3]
 
     client = ModbusSerialClient(
@@ -65,7 +95,6 @@ def modbus_connect(port: str):
                 return {"response": response}
         else:
             # Modbus connection error
-            client.close()
             return {}
 
     client.close()
@@ -107,7 +136,13 @@ def main():
 
     if len(ports) == 0:
         save_file(
-            {"comport_issue": "Serial comport list is empty."},
+            {
+                "timestamp": int(
+                    datetime.now().replace(second=0, microsecond=0).timestamp()
+                ),
+                "host": dev_info(),
+                "comport_issue": "Serial comport list is empty.",
+            },
             "errors.json",
         )
     else:
@@ -116,11 +151,26 @@ def main():
 
             if data == {}:
                 save_file(
-                    {"modbus_connection_error": "Could't connect to the Modbus Slave"},
+                    {
+                        "timestamp": int(
+                            datetime.now().replace(second=0, microsecond=0).timestamp()
+                        ),
+                        "host": dev_info(),
+                        "modbus_connection_error": "Could't connect to the Modbus Slave",
+                    },
                     "errors.json",
                 )
             elif data.get("response", "") != "":
-                save_file({"fault": data["response"]}, "errors.json")
+                save_file(
+                    {
+                        "timestamp": int(
+                            datetime.now().replace(second=0, microsecond=0).timestamp()
+                        ),
+                        "host": dev_info(),
+                        "fault": data["response"],
+                    },
+                    "errors.json",
+                )
             else:
                 save_file(data, "modbus_data.json")
 

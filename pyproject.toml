@@ -10,6 +10,7 @@ python = "^3.12"
 pymodbus = {extras = ["all"], version = "^3.5.2"}
 pyserial = "^3.5"
 bitstring = "^4.2.3"
+get-nic = "^0.0.3"
 
 
 [build-system]
