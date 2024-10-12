@@ -1,19 +1,19 @@
 import json, os, platform, socket
 from datetime import datetime
 
-from pymodbus.client import ModbusSerialClient
 from bitstring import BitArray
 from get_nic import getnic
+from pymodbus.client import ModbusSerialClient
 
 
 def dev_info() -> dict:
     return {
         "name": socket.gethostname(),
-        "nicInterfaces": getnic.ipaddr(getnic.interfaces()),
-        "platform": platform.platform(),
-        "architecture": platform.architecture(),
+        # "nicInterfaces": getnic.ipaddr(getnic.interfaces()),
+        # "platform": platform.platform(),
+        # "architecture": platform.architecture(),
         "machine": platform.machine(),
-        "pythonVersion": platform.python_version(),
+        # "pythonVersion": platform.python_version(),
     }
 
 
@@ -39,7 +39,7 @@ def parse_data(data: list, slave_id: str, port_name: str):
 
     Args:
         data (list): raw Modbus data from HEXADECIMAL system
-        slave_id (str): It's float between hardware I/O ports modules
+        slave_id (str): It's float between hardware modules I/O ports
         port_name (str): USB port name like `/dev/tty/ACM0` as the comport type
 
     Returns:
