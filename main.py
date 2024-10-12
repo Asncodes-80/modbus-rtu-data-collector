@@ -86,7 +86,7 @@ def parse_data(data: list, slave_id: str, port_name: str):
     output = [BitArray(hex=hex(v)).bin for v in data[10:]]
 
     return {
-        "timestamp": int(datetime.now().replace(second=0, microsecond=0).timestamp()),
+        "timestamp": int(datetime.now().timestamp()),
         "slave": {"id": str(slave_id), "port": port_name},
         "host": dev_info(),
         "digital": [item for sublist in input[0:2] for item in sublist],
@@ -171,9 +171,7 @@ def main():
     if len(ports) == 0:
         save_file(
             {
-                "timestamp": int(
-                    datetime.now().replace(second=0, microsecond=0).timestamp()
-                ),
+                "timestamp": int(datetime.now().timestamp()),
                 "host": dev_info(),
                 "comport_issue": "Serial comport list is empty.",
             },
@@ -186,9 +184,7 @@ def main():
             if data == {}:
                 save_file(
                     {
-                        "timestamp": int(
-                            datetime.now().replace(second=0, microsecond=0).timestamp()
-                        ),
+                        "timestamp": int(datetime.now().timestamp()),
                         "host": dev_info(),
                         "modbus_connection_error": "Could't connect to the Modbus Slave",
                     },
@@ -197,9 +193,7 @@ def main():
             elif data.get("response", "") != "":
                 save_file(
                     {
-                        "timestamp": int(
-                            datetime.now().replace(second=0, microsecond=0).timestamp()
-                        ),
+                        "timestamp": int(datetime.now().timestamp()),
                         "host": dev_info(),
                         "fault": data["response"],
                     },
