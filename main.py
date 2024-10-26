@@ -1,4 +1,4 @@
-import json, os, platform, socket
+import argparse, json, os, platform, socket
 from datetime import datetime
 
 from bitstring import BitArray
@@ -17,15 +17,18 @@ def dev_info() -> dict:
     }
 
 
-def get_serial_comport():
+def get_serial_comport(is_comport: bool = False):
     """Only returns comport type tty USB ports."""
 
     import serial.tools.list_ports
 
     COMPORT_NAME: str = "STM32 Virtual ComPort"
-
     ports = serial.tools.list_ports.comports()
-    return [port.device for port in ports if port.product == COMPORT_NAME]
+
+    if is_comport:
+        return [port.device for port in ports if port.product == COMPORT_NAME]
+    else:
+        return [port.device for port in ports if port.product is not None]
 
 
 def single_byte(v):
@@ -165,11 +168,13 @@ def save_file(data, file_name):
             json.dump([data], file, indent=3, sort_keys=True)
 
 
-def main():
-    ports: list[str] = get_serial_comport()
+def main(connection_type: str):
+    ports: list[str] = get_serial_comport(
+        is_comport=True if connection_type == "comport" else False
+    )
 
     if len(ports) == 0:
-        save_file(
+        print(
             {
                 "timestamp": int(datetime.now().timestamp()),
                 "host": dev_info(),
@@ -182,7 +187,7 @@ def main():
             data = modbus_connect(port)
 
             if data == {}:
-                save_file(
+                print(
                     {
                         "timestamp": int(datetime.now().timestamp()),
                         "host": dev_info(),
@@ -191,7 +196,7 @@ def main():
                     "errors.json",
                 )
             elif data.get("response", "") != "":
-                save_file(
+                print(
                     {
                         "timestamp": int(datetime.now().timestamp()),
                         "host": dev_info(),
@@ -200,8 +205,16 @@ def main():
                     "errors.json",
                 )
             else:
-                save_file(data, "modbus_data.json")
+                print(data, "modbus_data.json")
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(
+        prog="Modbus data collector",
+        description="Connects to the PSIM IoT device and grabs real-time data.",
+        epilog="For usb connection `python main.py -c usb` or comport Modbus connection python main.py -c comport",
+    )
+    parser.add_argument("-c", "--connection")
+    args = parser.parse_args()
+
+    main(args.connection)
