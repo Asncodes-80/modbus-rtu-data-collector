@@ -71,7 +71,7 @@ def parse_data(data: list, slave_id: str, port_name: str):
         "digital": [1, 0, 1, 0],
         "temperature": [12, 13, 14, 15],
         "humidity": [14, 15, 16, 17],
-        "analog": [1234, 3456, 4567, 5854],
+        "analog": [1234.0, 3456.0, 4567.0, 5854.0],
         "output": {
         "led": [0, 1, 0, 1],
         "relay": [1, 0, 1, 0]
@@ -82,7 +82,9 @@ def parse_data(data: list, slave_id: str, port_name: str):
     input = [
         [int(single_byte(v)[0], 16), int(single_byte(v)[1], 16)] for v in data[0:6]
     ]
-    analog = [int(hex(v), 16) for v in data[6:10]]
+    # Previous version we got only integer value.
+    # analog = [int(hex(v), 16) for v in data[6:10]]
+    analog = [float(v) / 10 for v in data[6:10]]
     output = [BitArray(hex=hex(v)).bin for v in data[10:]]
 
     return {
@@ -90,7 +92,7 @@ def parse_data(data: list, slave_id: str, port_name: str):
         "slave": {"id": str(slave_id), "port": port_name},
         "host": dev_info(),
         "digital": [item for sublist in input[0:2] for item in sublist],
-        "temperature": [item for sublist in input[3:5] for item in sublist],
+        "temperature": [item for sublist in input[2:4] for item in sublist],
         "humidity": [item for sublist in input[4:6] for item in sublist],
         "analog": analog,
         "output": {
